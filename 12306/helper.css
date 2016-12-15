@@ -1,0 +1,15 @@
+#helper-query-button {
+    border-style: none;
+    font-size: 12px;
+    width: 80px;
+    height: 30px;
+    line-height: 30px;
+    background: green;
+    color: white;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -ms-border-radius: 4px;
+    -o-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    margin: 5px 0px;
+}
