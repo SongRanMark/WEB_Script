@@ -14,24 +14,29 @@
 var cssString = GM_getResourceText("helperCSS");
 GM_addStyle(cssString);
 
-// 记录列表中用户选择将要抢票的列车索引，在请求到的最新数据中通过该索引获取对应列车数据，检查是否可以下单。
-var selectedTrainIndex = 0;
+// 记录列表中用户选择将要抢票的列车 ID。
+var selectedTrainID = "";
 var operationButtonHTML = "<button type='button' id='helper-query-button'>自动预定</button>";
-$("#t-list").prepend(operationButtonHTML);
+$("#sear-result").append(operationButtonHTML);
+// 根据用户选择的列车自动预定车票。
 $("#helper-query-button").click(function() {
-    if (!isThereTrainList()) {
-        alert("请先查询车次列表，并选择要自动预定的车次");
+    if (selectedTrainID == "") {
+        alert("请先查询车次列表，并在其他一栏中选择要自动预定的车次");
         return;
     };
 
-    canSelectedTrainTicketBuy(selectedTrainIndex);
+    canSelectedTrainTicketBuy(selectedTrainID);
+});
+// 在列车列表的其他项一栏增加单选按钮供用户选择要预定的列车。
+$("#t-list").bind('DOMNodeInserted', function(e) {
+    if ("queryLeftTable" != e.target.id) {
+        return;
+    }
+
+    addRadioButonInTrainList();
 });
 
-function isThereTrainList() {
-    return $("#queryLeftTable").html() != "";
-}
-
-function canSelectedTrainTicketBuy(index) {
+function canSelectedTrainTicketBuy(trainID) {
     var parameters = {
         "leftTicketDTO.train_date": $.trim($("#train_date").val()),
         "leftTicketDTO.from_station": $("#fromStation").val(),
@@ -49,16 +54,24 @@ function canSelectedTrainTicketBuy(index) {
         data: parameters,
         timeout: 10000,
         success: function(result, status, xhr) {
-            var record = result.data[index];
+            for (var i = 0; i < result.data.length; i++) {
+                var record = result.data[i];
+                if (record.queryLeftNewDTO.train_no != trainID) {
+                    continue;
+                }
 
-            if ("Y" == record.queryLeftNewDTO.canWebBuy) {
+                if (record.queryLeftNewDTO.canWebBuy != "Y") {
+                    break;
+                }
+
                 buyTrainTicket(record);
-            } else {
-                canSelectedTrainTicketBuy(index);
-            }
+                return;
+            };
+
+            canSelectedTrainTicketBuy(trainID);
         },
         error: function(xhr, status, error) {
-            canSelectedTrainTicketBuy(index);
+            canSelectedTrainTicketBuy(trainID);
         }
     });
 }
@@ -67,23 +80,20 @@ function buyTrainTicket(record) {
     checkG1234(record.secretStr, record.queryLeftNewDTO.start_time, record.queryLeftNewDTO.train_no, record.queryLeftNewDTO.from_station_telecode, record.queryLeftNewDTO.to_station_telecode);
 }
 
-$("#t-list").bind('DOMNodeInserted', function(e) {
-    if ("queryLeftTable" != e.target.id) {
-        return;
-    }
+function addRadioButonInTrainList() {
+    var trainOtherItemList = $("#queryLeftTable").children("[id^='ticket_']").children("[id^='QT_']");
+    trainOtherItemList.each(function(index, element) {
+        var trainID = element.id.substr(3);
+        var radioHTML = "<input type='radio' name='trainList' value='"+ trainID +"'/>";
+        $(this).html(radioHTML);
+        $(this).removeAttr("onclick");
 
-    var trainList = $("#queryLeftTable").children("[id^='ticket_']");
-    var index = 0;
-    trainList.each(function() {
-        var radioHTML = "<input type='radio' name='trainList' ";
-        radioHTML += index == 0 ? "checked = 'checked' " : "";
-        radioHTML += "value='"+ index +"'/>";
-        var otherItem = $(this).children("[id^='QT_']");
-        otherItem.html(radioHTML);
-        otherItem.removeAttr("onclick");
-        index++;
+        if (index == 0) {
+            selectedTrainID = trainID;
+            $(this).children().attr("checked", "checked");
+        }
     });
     $("input[name='trainList']").change(function() {
-        selectedTrainIndex = Number($(this).val());
+        selectedTrainID = $(this).val();
     });
-});
+}

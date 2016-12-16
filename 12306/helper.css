@@ -1,15 +1,30 @@
+.sear-result span {
+    right: 100px;
+}
+
 #helper-query-button {
     border-style: none;
     font-size: 12px;
     width: 80px;
-    height: 30px;
-    line-height: 30px;
-    background: green;
+    height: 27px;
+    background: #4cae4c;
     color: white;
     border-radius: 4px;
     -moz-border-radius: 4px;
     -ms-border-radius: 4px;
     -o-border-radius: 4px;
     -webkit-border-radius: 4px;
-    margin: 5px 0px;
+    outline: none;
+    cursor: pointer;
+    position: absolute;
+    top: 4px;
+    right: 0;
+}
+
+#helper-query-button:hover {
+    background: #5cb85c;
+}
+
+#helper-query-button:active {
+    background: #4cae4c;
 }
