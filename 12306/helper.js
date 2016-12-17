@@ -16,16 +16,27 @@ GM_addStyle(cssString);
 
 // 记录列表中用户选择将要抢票的列车 ID。
 var selectedTrainID = "";
+// 标记当前工作状态，是否正在尝试预定，用于开始与停止的切换
+var isBuying = false;
 var operationButtonHTML = "<button type='button' id='helper-query-button'>自动预定</button>";
 $("#sear-result").append(operationButtonHTML);
-// 根据用户选择的列车自动预定车票。
+// 开始或停止根据用户选择的列车自动预定车票。
 $("#helper-query-button").click(function() {
-    if (selectedTrainID == "") {
-        alert("请先查询车次列表，并在其他一栏中选择要自动预定的车次");
-        return;
-    };
+    isBuying = !isBuying;
 
-    canSelectedTrainTicketBuy(selectedTrainID);
+    if (isBuying) {
+        if (selectedTrainID == "") {
+            isBuying = false;
+            alert("请先查询车次列表，并在其他一栏中选择要自动预定的车次");
+
+            return;
+        }
+
+        $(this).text("停止预定");
+        tryToBuyTicket();
+    } else {
+        $(this).text("自动预定");
+    }
 });
 // 在列车列表的其他项一栏增加单选按钮供用户选择要预定的列车。
 $("#t-list").bind('DOMNodeInserted', function(e) {
@@ -36,8 +47,32 @@ $("#t-list").bind('DOMNodeInserted', function(e) {
     addRadioButonInTrainList();
 });
 
-function canSelectedTrainTicketBuy(trainID) {
-    var parameters = {
+function tryToBuyTicket() {
+    if (isBuying) {
+        checkTrainList(function(result, status, xhr) {
+            for (var i = 0; i < result.data.length; i++) {
+                var record = result.data[i];
+                if (record.queryLeftNewDTO.train_no != selectedTrainID) {
+                    continue;
+                }
+
+                if (record.queryLeftNewDTO.canWebBuy != "Y") {
+                    break;
+                }
+
+                buyTrainTicket(record);
+                return;
+            };
+
+            tryToBuyTicket();
+        }, function(xhr, status, error) {
+            tryToBuyTicket();
+        });
+    }
+}
+
+function checkTrainList(success, error) {
+        var parameters = {
         "leftTicketDTO.train_date": $.trim($("#train_date").val()),
         "leftTicketDTO.from_station": $("#fromStation").val(),
         "leftTicketDTO.to_station": $("#toStation").val(),
@@ -53,26 +88,8 @@ function canSelectedTrainTicketBuy(trainID) {
         url: ctx + CLeftTicketUrl,
         data: parameters,
         timeout: 10000,
-        success: function(result, status, xhr) {
-            for (var i = 0; i < result.data.length; i++) {
-                var record = result.data[i];
-                if (record.queryLeftNewDTO.train_no != trainID) {
-                    continue;
-                }
-
-                if (record.queryLeftNewDTO.canWebBuy != "Y") {
-                    break;
-                }
-
-                buyTrainTicket(record);
-                return;
-            };
-
-            canSelectedTrainTicketBuy(trainID);
-        },
-        error: function(xhr, status, error) {
-            canSelectedTrainTicketBuy(trainID);
-        }
+        success: success,
+        error: error
     });
 }
 
