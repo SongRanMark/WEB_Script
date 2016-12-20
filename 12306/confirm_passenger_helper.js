@@ -4,7 +4,7 @@
 // @description  12306 Confirm Passenger Helper
 // @author       S.R
 // @include      https://kyfw.12306.cn/otn/confirmPassenger/initDc
-// @require      file:///Users/marksong/Desktop/Web_Script/12306/confirm_passenger_helper.js
+// @require      file://Web_Script/12306/confirm_passenger_helper.js
 // ==/UserScript==
 
 // 监听常用联系人加载完成后，选择联系人并提交订单。
@@ -15,7 +15,14 @@ $("#normal_passenger_id").one('DOMNodeInserted', function(e) {
     通过这种方式实现。
     */
     setTimeout(function() {
-        $("[id^='normalPassenger_']").click();
+        $("[id^='normalPassenger_']").first().click();
         $("#submitOrder_id").click();
     }, 0);
+});
+
+// 添加空格键为提交订单的快捷键。
+$(document).keydown(function(e) {
+    if(e.keyCode == 32){
+        $("#qr_submit_id").click();
+    }
 });

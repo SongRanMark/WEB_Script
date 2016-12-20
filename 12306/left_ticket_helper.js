@@ -3,9 +3,9 @@
 // @version      0.1
 // @description  12306 Helper
 // @author       S.R
-// @include      https://kyfw.12306.cn/otn/leftTicket/init
-// @require      file:///Web_Script/12306/helper.js
-// @resource     helperCSS file:///Web_Script/12306/helper.css
+// @include      https://kyfw.12306.cn/otn/leftTicket/init*
+// @require      file://Web_Script/12306/left_ticket_helper.js
+// @resource     helperCSS file://Web_Script/12306/left_ticket_helper.css
 // @grant        GM_addStyle
 // @grant        GM_getResourceText
 // ==/UserScript==
