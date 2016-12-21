@@ -20,7 +20,7 @@ $("#normal_passenger_id").one('DOMNodeInserted', function(e) {
     }, 0);
 });
 
-// 添加空格键为提交订单的快捷键。
+// 添加空格键为确认订单的快捷键。
 $(document).keydown(function(e) {
     if(e.keyCode == 32){
         $("#qr_submit_id").click();

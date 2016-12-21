@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         12306 Helper
+// @name         12306 Left Ticket Helper
 // @version      0.1
-// @description  12306 Helper
+// @description  12306 Left Ticket Helper
 // @author       S.R
 // @include      https://kyfw.12306.cn/otn/leftTicket/init*
 // @require      file://Web_Script/12306/left_ticket_helper.js
